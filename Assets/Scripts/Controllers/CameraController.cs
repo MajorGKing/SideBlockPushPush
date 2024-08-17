@@ -19,7 +19,7 @@ public class CameraController : MonoBehaviour
     }
 
     void LateUpdate()
-    { 
+    {
         if (_mode == Define.CameraMode.QuarterView)
         {
             RaycastHit hit;
@@ -30,10 +30,14 @@ public class CameraController : MonoBehaviour
             }
             else
             {
-				transform.position = _player.transform.position + _delta;
-				transform.LookAt(_player.transform);
-			}
-		}
+                transform.position = _player.transform.position + _delta;
+                transform.LookAt(_player.transform);
+            }
+        }
+        else if (_mode == Define.CameraMode.NormalView)
+        {
+
+        }
     }
 
     public void SetQuarterView(Vector3 delta)
