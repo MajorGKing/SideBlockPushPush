@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class GameScene : BaseScene
@@ -10,15 +9,15 @@ public class GameScene : BaseScene
     public SpriteRenderer[] _blocks2;
     public SpriteRenderer[] _blocks3;
     private List<List<int>> m_blockNumbers = new List<List<int>>();
+    private List<int> m_bottomStockNumber = new List<int>();
+    public SpriteRenderer[] _bottomBlocks;
+    private const int BLOCK_TYPES = 7; // m = 7 as mentioned before
+
     protected override void Init()
     {
         base.Init();
-
         SceneType = Define.Scene.Game;
-
-        //Managers.UI.ShowSceneUI<UI_Inven>();
-
-        //Dictionary<int, Stat> dict = Managers.Data.StatDict;
+        
         for (int i = 0; i < 4; i++)
         {
             m_blockNumbers.Add(new List<int>());
@@ -29,9 +28,14 @@ public class GameScene : BaseScene
         AddBlockNumbers(_blocks2, m_blockNumbers[2]);
         AddBlockNumbers(_blocks3, m_blockNumbers[3]);
 
-        InitRandomBlocks();
-        UpdateBlockColor();
+        for(int i = 0; i < _bottomBlocks.Length; i++)
+        {
+            m_bottomStockNumber.Add(1);
+        }
 
+        InitClearableBlocks();
+        UpdateBlockColor();
+        UpdateBottomColor();
     }
 
     private void AddBlockNumbers(SpriteRenderer[] blocks, List<int> blockNumbers)
@@ -40,23 +44,49 @@ public class GameScene : BaseScene
         blockNumbers.Add(count);
     }
 
-    private void InitRandomBlocks()
+    private void InitClearableBlocks()
     {
-        System.Random rand = new System.Random();
+        while (GetTotalBlockCount() > 0)
+        {
+            int number = Random.Range(2, BLOCK_TYPES + 2); // Random number between 2 and 8 (inclusive)
+            for (int i = 0; i < 3; i++)
+            {
+                AddBlockToRandomList(number);
+                if (GetTotalBlockCount() == 0) break;
+            }
+        }
 
+        // Reverse each list in m_blockNumbers
         for (int i = 0; i < m_blockNumbers.Count; i++)
         {
-            m_blockNumbers[i].Clear(); // Clear any existing data
-
-            foreach (SpriteRenderer block in GetBlocksArray(i))
-            {
-                int randomValue = rand.Next(2, 9); // Random value between 2 and 8 (inclusive)
-                m_blockNumbers[i].Add(randomValue);
-            }
+            m_blockNumbers[i].Reverse();
         }
     }
 
-    // Second method: UpdateBlockColor
+    private void AddBlockToRandomList(int number)
+    {
+        List<int> availableLists = new List<int>();
+        for (int i = 0; i < m_blockNumbers.Count; i++)
+        {
+            if (m_blockNumbers[i].Count < GetBlocksArray(i).Length)
+            {
+                availableLists.Add(i);
+            }
+        }
+
+        if (availableLists.Count > 0)
+        {
+            int randomListIndex = availableLists[Random.Range(0, availableLists.Count)];
+            m_blockNumbers[randomListIndex].Add(number);
+        }
+    }
+
+    private int GetTotalBlockCount()
+    {
+        return (_blocks0.Length + _blocks1.Length + _blocks2.Length + _blocks3.Length) - 
+               (m_blockNumbers[0].Count + m_blockNumbers[1].Count + m_blockNumbers[2].Count + m_blockNumbers[3].Count);
+    }
+
     private void UpdateBlockColor()
     {
         for (int i = 0; i < m_blockNumbers.Count; i++)
@@ -78,6 +108,21 @@ public class GameScene : BaseScene
         }
     }
 
+    private void UpdateBottomColor()
+    {
+        for(int i = 0; i < m_bottomStockNumber.Count; i++)
+        {
+            if(i < _bottomBlocks.Length)
+            {
+                int colorIndex = m_bottomStockNumber[i];
+                if (colorIndex >= 0 && colorIndex < _colors.Length)
+                {
+                    _bottomBlocks[i].sprite = _colors[colorIndex];
+                }
+            }
+        }
+    }
+
     private SpriteRenderer[] GetBlocksArray(int index)
     {
         switch (index)
@@ -90,9 +135,13 @@ public class GameScene : BaseScene
         }
     }
 
-
     public override void Clear()
     {
+        // Implementation for Clear method if needed
+    }
 
+    public void LineTouched(int lineIndex)
+    {
+        Debug.Log("Line Touched : " + lineIndex);
     }
 }

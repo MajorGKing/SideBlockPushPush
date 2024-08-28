@@ -1,7 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class CameraController : MonoBehaviour
 {
@@ -43,9 +43,16 @@ public class CameraController : MonoBehaviour
 
                 // Check if the touch is over a UI element
                 int _index = (Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer) ? 0 : -1;
-                if (EventSystem.current.IsPointerOverGameObject(_index))
+                // if (EventSystem.current.IsPointerOverGameObject(_index))
+                // {
+                //     // Touch is on a UI element, so do nothing
+                //     return;
+                // }
+
+                // Check if the touch is over a UI element
+                if (true == IsTouchOverSpecificUI(touchPosition))
                 {
-                    // Touch is on a UI element, so do nothing
+                    // Touch is on a specific UI element, so do nothing
                     return;
                 }
 
@@ -59,8 +66,37 @@ public class CameraController : MonoBehaviour
                 if (hit.collider != null)
                 {
                     Debug.Log(hit.transform.name);
+
+                    if(hit.transform.TryGetComponent<LineTouch>(out LineTouch lineTouch))
+                    {
+                        lineTouch.LineTouched();
+                    }
                 }
             }
         }
+    }
+
+    private bool IsTouchOverSpecificUI(Vector2 touchPosition)
+    {
+        PointerEventData pointerData = new PointerEventData(EventSystem.current)
+        {
+            position = touchPosition
+        };
+
+        List<RaycastResult> raycastResults = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerData, raycastResults);
+
+        foreach (RaycastResult result in raycastResults)
+        {
+            // Check if the hit UI element is of a specific type
+            if (result.gameObject.GetComponent<Button>() != null ||
+                result.gameObject.GetComponent<Dropdown>() != null ||
+                result.gameObject.GetComponent<Toggle>() != null ||
+                result.gameObject.GetComponent<Slider>() != null)
+            {
+                return true; // Touch is over a specific UI element that should be ignored
+            }
+        }
+        return false; // Touch is not over any specific UI element
     }
 }
