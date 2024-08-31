@@ -22,11 +22,6 @@ public class GameScene : BaseScene
         {
             m_blockNumbers.Add(new List<int>());
         }
-        // Add the count of blocks to m_blockNumbers
-        AddBlockNumbers(_blocks0, m_blockNumbers[0]);
-        AddBlockNumbers(_blocks1, m_blockNumbers[1]);
-        AddBlockNumbers(_blocks2, m_blockNumbers[2]);
-        AddBlockNumbers(_blocks3, m_blockNumbers[3]);
 
         for(int i = 0; i < _bottomBlocks.Length; i++)
         {
@@ -38,20 +33,18 @@ public class GameScene : BaseScene
         UpdateBottomColor();
     }
 
-    private void AddBlockNumbers(SpriteRenderer[] blocks, List<int> blockNumbers)
-    {
-        int count = blocks.Length;
-        blockNumbers.Add(count);
-    }
-
     private void InitClearableBlocks()
     {
         while (GetTotalBlockCount() > 0)
         {
+            Debug.Log("GetTotalBlockCount() : " + GetTotalBlockCount());
             int number = Random.Range(2, BLOCK_TYPES + 2); // Random number between 2 and 8 (inclusive)
             for (int i = 0; i < 3; i++)
             {
                 AddBlockToRandomList(number);
+
+                
+                
                 if (GetTotalBlockCount() == 0) break;
             }
         }
@@ -143,5 +136,65 @@ public class GameScene : BaseScene
     public void LineTouched(int lineIndex)
     {
         Debug.Log("Line Touched : " + lineIndex);
+
+        var popNumber = m_blockNumbers[lineIndex][0];
+
+        if (popNumber >= 2)
+        {
+            var bottomMax = true;
+
+            for (int i = m_bottomStockNumber.Count - 1; i >= 0; i--)
+            {
+                if (m_bottomStockNumber[i] == 0 || m_bottomStockNumber[i] == 1)
+                {
+                    m_bottomStockNumber[i] = popNumber;
+                    bottomMax = false;
+                    break;
+                }
+            }
+
+            if (bottomMax == false)
+            {
+                m_blockNumbers[lineIndex].RemoveAt(0);
+                m_blockNumbers[lineIndex].Add(1);
+
+                CheckAndRemoveBottomNumbers();
+
+                UpdateBottomColor();
+                UpdateBlockColor();
+            }
+        }
+    }
+
+    private void CheckAndRemoveBottomNumbers()
+    {
+        bool removed;
+
+        do
+        {
+            removed = false;
+            for (int i = m_bottomStockNumber.Count - 1; i >= 2; i--)
+            {
+                if (m_bottomStockNumber[i] >= 2)
+                {
+
+                    if (m_bottomStockNumber[i] == m_bottomStockNumber[i - 1] &&
+                        m_bottomStockNumber[i] == m_bottomStockNumber[i - 2])
+                    {
+                        // Set the numbers to zero to remove them
+                        m_bottomStockNumber.RemoveAt(i);
+                        m_bottomStockNumber.RemoveAt(i - 1);
+                        m_bottomStockNumber.RemoveAt(i - 2);
+
+                        m_bottomStockNumber.Insert(0, 1);
+                        m_bottomStockNumber.Insert(0, 1);
+                        m_bottomStockNumber.Insert(0, 1);
+
+                        removed = true;
+                        break; // Restart checking from the beginning
+                    }
+                }
+            }
+        } while (removed);
     }
 }
