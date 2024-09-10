@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class GameScene : BaseScene
@@ -133,7 +134,7 @@ public class GameScene : BaseScene
         // Implementation for Clear method if needed
     }
 
-    public void LineTouched(int lineIndex)
+    public async void LineTouched(int lineIndex)
     {
         Debug.Log("Line Touched : " + lineIndex);
 
@@ -158,15 +159,82 @@ public class GameScene : BaseScene
                 m_blockNumbers[lineIndex].RemoveAt(0);
                 m_blockNumbers[lineIndex].Add(1);
 
-                CheckAndRemoveBottomNumbers();
+                UpdateBottomColor();
+                UpdateBlockColor();
+
+                await CheckAndRemoveBottomNumbers();
 
                 UpdateBottomColor();
                 UpdateBlockColor();
+
+                // Check bottom max
+                if(true == CheckBottomMax())
+                {
+                    var emptyLine = CheckEmptyBlockLine();
+                    if(emptyLine == -1)
+                    {
+                        // GameOver
+                    }
+                    else if(emptyLine != -1)
+                    {
+                        MoveBlocksDown(emptyLine);
+                        UpdateBlockColor();
+                        UpdateBottomColor();
+                    }
+                }
             }
         }
     }
 
-    private void CheckAndRemoveBottomNumbers()
+    private void MoveBlocksDown(int emptyLine)
+    {
+        // Move blocks down from the line above the empty line
+        for (int i = emptyLine; i < m_blockNumbers.Count - 1; i++)
+        {
+            m_blockNumbers[i] = new List<int>(m_blockNumbers[i + 1]); // Move the blocks from line above
+        }
+
+        // Now move the bottom blocks up to fill the last row of m_blockNumbers
+        for (int i = 0; i < m_blockNumbers[m_blockNumbers.Count - 1].Count; i++)
+        {
+            if (i < _bottomBlocks.Length)
+            {
+                m_blockNumbers[m_blockNumbers.Count - 1][i] = m_bottomStockNumber[i];
+            }
+        }
+
+        // Clear the bottom row after moving them
+        for (int i = 0; i < m_bottomStockNumber.Count; i++)
+        {
+            m_bottomStockNumber[i] = 1; // Set to default value or whatever you want the empty state to be
+        }
+    }
+
+    private bool CheckBottomMax()
+    {
+       if(m_bottomStockNumber[0] >= 2)
+       {
+            Debug.Log("Max Bottom!");
+            return true;
+       }
+
+       return false;
+    }
+
+    private int CheckEmptyBlockLine()
+    {
+        for (int i = m_blockNumbers.Count - 1; i >= 0; i--)
+        {
+            if (m_blockNumbers[i][0] == 0 || m_blockNumbers[i][0] == 1)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private async UniTask CheckAndRemoveBottomNumbers()
     {
         bool removed;
 
@@ -181,6 +249,8 @@ public class GameScene : BaseScene
                     if (m_bottomStockNumber[i] == m_bottomStockNumber[i - 1] &&
                         m_bottomStockNumber[i] == m_bottomStockNumber[i - 2])
                     {
+                        await BlockRemoveAnimation(i);
+
                         // Set the numbers to zero to remove them
                         m_bottomStockNumber.RemoveAt(i);
                         m_bottomStockNumber.RemoveAt(i - 1);
@@ -190,11 +260,26 @@ public class GameScene : BaseScene
                         m_bottomStockNumber.Insert(0, 1);
                         m_bottomStockNumber.Insert(0, 1);
 
+                        
+
                         removed = true;
                         break; // Restart checking from the beginning
                     }
                 }
             }
         } while (removed);
+
+        return ; 
+    }
+
+    private async UniTask BlockRemoveAnimation(int startIndex)
+    {
+        _bottomBlocks[startIndex].GetComponent<Animation>().Play("Alpha01");
+        _bottomBlocks[startIndex - 1].GetComponent<Animation>().Play("Alpha01");
+        _bottomBlocks[startIndex - 2].GetComponent<Animation>().Play("Alpha01");
+
+        await UniTask.Delay(500);
+
+        return ;
     }
 }
