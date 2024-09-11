@@ -13,6 +13,7 @@ public class GameScene : BaseScene
     private List<int> m_bottomStockNumber = new List<int>();
     public SpriteRenderer[] _bottomBlocks;
     private const int BLOCK_TYPES = 7; // m = 7 as mentioned before
+    private bool m_touchBlocked = false;
 
     protected override void Init()
     {
@@ -136,6 +137,13 @@ public class GameScene : BaseScene
 
     public async void LineTouched(int lineIndex)
     {
+        if(m_touchBlocked == true)
+        {
+            return;
+        }
+
+        m_touchBlocked = true;
+        
         Debug.Log("Line Touched : " + lineIndex);
 
         var popNumber = m_blockNumbers[lineIndex][0];
@@ -184,6 +192,7 @@ public class GameScene : BaseScene
                 }
             }
         }
+        m_touchBlocked = false;
     }
 
     private void MoveBlocksDown(int emptyLine)
