@@ -282,4 +282,14 @@ public class GameScene : BaseScene
 
         return ;
     }
+
+    public void ResetButtonClicked()
+    {
+        Managers.Scene.LoadScene(Define.Scene.Game);
+    }
+
+    public void ExitButtonClicked()
+    {
+        Application.Quit();
+    }
 }
