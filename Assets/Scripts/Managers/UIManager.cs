@@ -8,6 +8,7 @@ public class UIManager
 
     Stack<UI_Popup> _popupStack = new Stack<UI_Popup>();
     UI_Scene _sceneUI = null;
+    private UI_Game _ui_Game;
 
     public GameObject Root
     {
@@ -59,6 +60,11 @@ public class UIManager
         _sceneUI = sceneUI;
 
 		go.transform.SetParent(Root.transform);
+
+        if(typeof(T) == typeof(UI_Game))
+        {
+            _ui_Game = sceneUI as UI_Game;
+        }
 
 		return sceneUI;
 	}
@@ -112,5 +118,10 @@ public class UIManager
     {
         CloseAllPopupUI();
         _sceneUI = null;
+    }
+
+    public void UpdateGameTime(float time)
+    {
+        _ui_Game.UpdateTime(time);
     }
 }

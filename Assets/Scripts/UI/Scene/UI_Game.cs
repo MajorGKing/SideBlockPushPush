@@ -1,18 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class UI_Game : UI_Scene
 {
-    // Start is called before the first frame update
-    void Start()
+
+    public TextMeshProUGUI _time;
+    public TextMeshProUGUI _gameOver;
+    public override void Init()
+	{
+		Managers.UI.SetCanvas(gameObject, false);
+	}
+
+    public void ResetButtonClicked()
     {
-        
+        Managers.Game.ResetButtonClicked();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void ExitButtonClicked()
     {
-        
+        Managers.Game.ExitButtonClicked();
+    }
+
+    public void UpdateTime(float time)
+    {
+        _time.text = time.ToString("F2");
     }
 }

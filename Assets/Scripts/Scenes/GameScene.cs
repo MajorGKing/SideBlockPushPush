@@ -14,11 +14,14 @@ public class GameScene : BaseScene
     public SpriteRenderer[] _bottomBlocks;
     private const int BLOCK_TYPES = 7; // m = 7 as mentioned before
     private bool m_touchBlocked = false;
+    private float m_gameTime = 60f;
 
     protected override void Init()
     {
         base.Init();
         SceneType = Define.Scene.Game;
+
+        Managers.UI.ShowSceneUI<UI_Game>();
         
         for (int i = 0; i < 4; i++)
         {
@@ -292,13 +295,17 @@ public class GameScene : BaseScene
         return ;
     }
 
-    public void ResetButtonClicked()
+    public void OnUpdate(float deltaTime)
     {
-        Managers.Scene.LoadScene(Define.Scene.Game);
-    }
-
-    public void ExitButtonClicked()
-    {
-        Application.Quit();
+        if(Managers.Game.isGamePlayed == true)
+        {
+            m_gameTime -= deltaTime;
+            if(m_gameTime < 0)
+            {
+                m_gameTime = 0;
+                Managers.Game.GameIsPlayed(false);
+            }
+            Managers.Game.CallUITimeUpdate(m_gameTime);
+        }
     }
 }

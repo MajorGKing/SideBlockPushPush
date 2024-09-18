@@ -33,6 +33,7 @@ public class Managers : MonoBehaviour
     void Update()
     {
         _input.OnUpdate();
+        _game.OnUpdate(Time.deltaTime);
     }
 
     static void Init()
