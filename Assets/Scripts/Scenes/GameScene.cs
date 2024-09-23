@@ -16,22 +16,27 @@ public class GameScene : BaseScene
     private bool m_touchBlocked = false;
     private float m_gameTime = 60f;
 
+    private int m_bottomUpTimes = 0;
+
     protected override void Init()
     {
         base.Init();
         SceneType = Define.Scene.Game;
 
         Managers.UI.ShowSceneUI<UI_Game>();
-        
+
         for (int i = 0; i < 4; i++)
         {
             m_blockNumbers.Add(new List<int>());
         }
 
-        for(int i = 0; i < _bottomBlocks.Length; i++)
+        for (int i = 0; i < _bottomBlocks.Length; i++)
         {
             m_bottomStockNumber.Add(1);
         }
+
+        m_gameTime = 60f;
+        Managers.Game.GameIsPlayed(true);
 
         InitClearableBlocks();
         UpdateBlockColor();
@@ -48,8 +53,8 @@ public class GameScene : BaseScene
             {
                 AddBlockToRandomList(number);
 
-                
-                
+
+
                 if (GetTotalBlockCount() == 0) break;
             }
         }
@@ -81,7 +86,7 @@ public class GameScene : BaseScene
 
     private int GetTotalBlockCount()
     {
-        return (_blocks0.Length + _blocks1.Length + _blocks2.Length + _blocks3.Length) - 
+        return (_blocks0.Length + _blocks1.Length + _blocks2.Length + _blocks3.Length) -
                (m_blockNumbers[0].Count + m_blockNumbers[1].Count + m_blockNumbers[2].Count + m_blockNumbers[3].Count);
     }
 
@@ -108,9 +113,9 @@ public class GameScene : BaseScene
 
     private void UpdateBottomColor()
     {
-        for(int i = 0; i < m_bottomStockNumber.Count; i++)
+        for (int i = 0; i < m_bottomStockNumber.Count; i++)
         {
-            if(i < _bottomBlocks.Length)
+            if (i < _bottomBlocks.Length)
             {
                 int colorIndex = m_bottomStockNumber[i];
                 if (colorIndex >= 0 && colorIndex < _colors.Length)
@@ -140,13 +145,13 @@ public class GameScene : BaseScene
 
     public async void LineTouched(int lineIndex)
     {
-        if(m_touchBlocked == true)
+        if (Managers.Game.isGamePlayed == false || m_touchBlocked == true)
         {
             return;
         }
 
         m_touchBlocked = true;
-        
+
         Debug.Log("Line Touched : " + lineIndex);
 
         var popNumber = m_blockNumbers[lineIndex][0];
@@ -179,20 +184,34 @@ public class GameScene : BaseScene
                 UpdateBlockColor();
 
                 // Check bottom max
-                if(true == CheckBottomMax())
+                if (true == CheckBottomMax())
                 {
                     var emptyLine = CheckEmptyBlockLine();
-                    if(emptyLine == -1)
+                    if (emptyLine == -1)
                     {
                         // GameOver
+                        Managers.Game.GameIsPlayed(false);
+                        Debug.Log("Game Over!");
                     }
-                    else if(emptyLine != -1)
+                    else if (emptyLine != -1)
                     {
                         MoveBlocksDown(emptyLine);
                         UpdateBlockColor();
                         UpdateBottomColor();
+
+                        m_gameTime -= (10f + m_bottomUpTimes * 5f);
+                        m_bottomUpTimes++;
                     }
                 }
+
+                // Check Game Clear
+                if (AreAllBlockLinesEmpty() == true && IsBottomLineEmpty() == true)
+                {
+                    // Game Clear logic here
+                    Debug.Log("Game Cleared!");
+                    Managers.Game.GameIsPlayed(false);
+                }
+
             }
         }
         m_touchBlocked = false;
@@ -224,13 +243,13 @@ public class GameScene : BaseScene
 
     private bool CheckBottomMax()
     {
-       if(m_bottomStockNumber[0] >= 2)
-       {
+        if (m_bottomStockNumber[0] >= 2)
+        {
             Debug.Log("Max Bottom!");
             return true;
-       }
+        }
 
-       return false;
+        return false;
     }
 
     private int CheckEmptyBlockLine()
@@ -244,6 +263,34 @@ public class GameScene : BaseScene
         }
 
         return -1;
+    }
+    // Method to check if all block lines are empty
+    private bool AreAllBlockLinesEmpty()
+    {
+        foreach (var blockLine in m_blockNumbers)
+        {
+            foreach (var blockNumber in blockLine)
+            {
+                if (blockNumber >= 2) // Blocks with value 2 or higher are considered filled
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // Method to check if the bottom line is empty
+    private bool IsBottomLineEmpty()
+    {
+        foreach (var blockNumber in m_bottomStockNumber)
+        {
+            if (blockNumber >= 2) // Blocks with value 2 or higher are considered filled
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private async UniTask CheckAndRemoveBottomNumbers()
@@ -272,7 +319,7 @@ public class GameScene : BaseScene
                         m_bottomStockNumber.Insert(0, 1);
                         m_bottomStockNumber.Insert(0, 1);
 
-                        
+
 
                         removed = true;
                         break; // Restart checking from the beginning
@@ -281,7 +328,7 @@ public class GameScene : BaseScene
             }
         } while (removed);
 
-        return ; 
+        return;
     }
 
     private async UniTask BlockRemoveAnimation(int startIndex)
@@ -292,18 +339,19 @@ public class GameScene : BaseScene
 
         await UniTask.Delay(500);
 
-        return ;
+        return;
     }
 
     public void OnUpdate(float deltaTime)
     {
-        if(Managers.Game.isGamePlayed == true)
+        if (Managers.Game.isGamePlayed == true)
         {
             m_gameTime -= deltaTime;
-            if(m_gameTime < 0)
+            if (m_gameTime < 0)
             {
                 m_gameTime = 0;
                 Managers.Game.GameIsPlayed(false);
+                Debug.Log("Time Over Game Over");
             }
             Managers.Game.CallUITimeUpdate(m_gameTime);
         }
