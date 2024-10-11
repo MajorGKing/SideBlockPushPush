@@ -6,6 +6,10 @@ public class GameManager
 
     private bool m_isGamePlayed = true;
     public bool isGamePlayed{get {return m_isGamePlayed;}}
+
+    private int m_score;
+    public int _score{get {return m_score;}}
+
     public void Init()
     {
         
@@ -60,10 +64,17 @@ public class GameManager
     public void CallUIScoreUpdate(int score)
     {
         Managers.UI.UpdateGameScore(score);
+
+        m_score = score;
     }
 
     public void GameIsPlayed(bool play)
     {
         m_isGamePlayed = play;
+
+        if(m_isGamePlayed == false)
+        {
+            Managers.UI.ShowPopupUI<UI_Score>();
+        }
     }
 }
