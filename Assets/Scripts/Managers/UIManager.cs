@@ -124,4 +124,9 @@ public class UIManager
     {
         _ui_Game.UpdateTime(time);
     }
+
+    public void UpdateGameScore(int score)
+    {
+        _ui_Game.UpdateScore(score);
+    }
 }

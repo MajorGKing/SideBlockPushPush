@@ -7,6 +7,7 @@ public class UI_Game : UI_Scene
 {
 
     public TextMeshProUGUI _time;
+    public TextMeshProUGUI _score;
     public TextMeshProUGUI _gameOver;
     public override void Init()
 	{
@@ -26,5 +27,10 @@ public class UI_Game : UI_Scene
     public void UpdateTime(float time)
     {
         _time.text = time.ToString("F2");
+    }
+
+    public void UpdateScore(int score)
+    {
+        _score.text = score.ToString();
     }
 }
