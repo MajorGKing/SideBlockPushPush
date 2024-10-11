@@ -1286,4 +1286,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _time: {fileID: 5615818352277275787}
+  _score: {fileID: 4454519214750551700}
   _gameOver: {fileID: 2404389012412807121}

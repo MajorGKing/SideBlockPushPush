@@ -17,6 +17,7 @@ public class GameScene : BaseScene
     private float m_gameTime = 60f;
 
     private int m_bottomUpTimes = 0;
+    private int m_score = 0;
 
     protected override void Init()
     {
@@ -35,6 +36,8 @@ public class GameScene : BaseScene
             m_bottomStockNumber.Add(1);
         }
 
+        m_score = 0;
+        Managers.Game.CallUIScoreUpdate(m_score);
         m_gameTime = 60f;
         Managers.Game.GameIsPlayed(true);
 
@@ -52,8 +55,6 @@ public class GameScene : BaseScene
             for (int i = 0; i < 3; i++)
             {
                 AddBlockToRandomList(number);
-
-
 
                 if (GetTotalBlockCount() == 0) break;
             }
@@ -319,9 +320,10 @@ public class GameScene : BaseScene
                         m_bottomStockNumber.Insert(0, 1);
                         m_bottomStockNumber.Insert(0, 1);
 
-
-
                         removed = true;
+                        m_score += 300;
+                        Managers.Game.CallUIScoreUpdate(m_score);
+
                         break; // Restart checking from the beginning
                     }
                 }

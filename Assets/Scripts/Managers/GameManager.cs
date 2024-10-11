@@ -57,6 +57,11 @@ public class GameManager
         Managers.UI.UpdateGameTime(time);
     }
 
+    public void CallUIScoreUpdate(int score)
+    {
+        Managers.UI.UpdateGameScore(score);
+    }
+
     public void GameIsPlayed(bool play)
     {
         m_isGamePlayed = play;
