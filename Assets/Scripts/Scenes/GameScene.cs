@@ -41,6 +41,8 @@ public class GameScene : BaseScene
         m_gameTime = 60f;
         Managers.Game.GameIsPlayed(true);
 
+        Managers.Sound.Play("BGM/001", Define.Sound.Bgm);
+
         InitClearableBlocks();
         UpdateBlockColor();
         UpdateBottomColor();
@@ -165,6 +167,7 @@ public class GameScene : BaseScene
             {
                 if (m_bottomStockNumber[i] == 0 || m_bottomStockNumber[i] == 1)
                 {
+                    Managers.Sound.Play("Effect/0001", Define.Sound.Effect);
                     m_bottomStockNumber[i] = popNumber;
                     bottomMax = false;
                     break;
@@ -323,6 +326,8 @@ public class GameScene : BaseScene
                         removed = true;
                         m_score += 300;
                         Managers.Game.CallUIScoreUpdate(m_score);
+
+                        Managers.Sound.Play("Effect/0003", Define.Sound.Effect);
 
                         break; // Restart checking from the beginning
                     }
