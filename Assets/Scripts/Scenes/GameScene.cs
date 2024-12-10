@@ -46,6 +46,9 @@ public class GameScene : BaseScene
         InitClearableBlocks();
         UpdateBlockColor();
         UpdateBottomColor();
+
+        Managers.Game.OnLineAttack -= LineAttacked;
+        Managers.Game.OnLineAttack += LineAttacked;
     }
 
     private void InitClearableBlocks()
@@ -146,7 +149,7 @@ public class GameScene : BaseScene
         // Implementation for Clear method if needed
     }
 
-    public async void LineTouched(int lineIndex)
+    public async void LineAttacked(int lineIndex)
     {
         if (Managers.Game.isGamePlayed == false || m_touchBlocked == true)
         {

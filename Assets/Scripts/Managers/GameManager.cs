@@ -1,18 +1,21 @@
+using System;
 using UnityEngine;
 
 public class GameManager
 {
-    private GameScene _scene;    
+    private GameScene _scene;
 
     private bool m_isGamePlayed = true;
-    public bool isGamePlayed{get {return m_isGamePlayed;}}
+    public bool isGamePlayed { get { return m_isGamePlayed; } }
 
     private int m_score;
-    public int _score{get {return m_score;}}
+    public int _score { get { return m_score; } }
+    private bool _touchEnable;
+    public bool TouchEnable { get { return _touchEnable; } set { _touchEnable = value; } }
 
     public void Init()
     {
-        
+        TouchEnable = true;
     }
 
     public void Clear()
@@ -22,25 +25,28 @@ public class GameManager
 
     public void LineTouch(int lineIndex)
     {
-        if(_scene == null)
-        {
-            _scene = (GameScene)Managers.Scene.CurrentScene;
-        }
+        if (TouchEnable == false)
+            return;
 
-        _scene.LineTouched(lineIndex);
+        OnLineTouched?.Invoke(lineIndex);
+    }
+
+    public void LineAttack(int lineIndex)
+    {
+        OnLineAttack?.Invoke(lineIndex);
     }
 
     public void ResetButtonClicked()
     {
-        if(Managers.Scene.CurrentScene.SceneType == Define.Scene.Game)
+        if (Managers.Scene.CurrentScene.SceneType == Define.Scene.Game)
         {
             Managers.Scene.LoadScene(Define.Scene.Game);
-        }  
+        }
     }
 
     public void ExitButtonClicked()
     {
-        if(Managers.Scene.CurrentScene.SceneType == Define.Scene.Game)
+        if (Managers.Scene.CurrentScene.SceneType == Define.Scene.Game)
         {
             Application.Quit();
         }
@@ -48,7 +54,7 @@ public class GameManager
 
     public void OnUpdate(float time)
     {
-        if(_scene == null)
+        if (_scene == null)
         {
             _scene = (GameScene)Managers.Scene.CurrentScene;
         }
@@ -72,9 +78,14 @@ public class GameManager
     {
         m_isGamePlayed = play;
 
-        if(m_isGamePlayed == false)
+        if (m_isGamePlayed == false)
         {
             Managers.UI.ShowPopupUI<UI_Score>();
         }
     }
+
+    #region Action
+    public event Action<int> OnLineTouched;
+    public event Action<int> OnLineAttack;
+    #endregion
 }
